@@ -211,7 +211,7 @@ spring:
 application:
 name: Product-api
 
-# opicional: rodar o maven no container - (Dockerfile)
+### opicional: rodar o maven no container - (Dockerfile)
 
 Dockerizing é o processo de compactação, implantação e execução de aplicativos usando contêineres do Docker.
 
@@ -223,27 +223,27 @@ Apache Maven, ou Maven, é uma ferramenta de automação de compilação, gerenc
 
 Create a Dockerfile
 
-#
+####
 
-# Build stage
+#### Build stage
 
-#
+####
 
-FROM maven:3.6.0-jdk-11-slim AS build
-COPY src /home/app/src
-COPY pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean package
+    FROM maven:3.6.0-jdk-11-slim AS build
+    COPY src /home/app/src
+    COPY pom.xml /home/app
+    RUN mvn -f /home/app/pom.xml clean package
 
-#
+####
 
-# Package stage
+#### Package stage
 
-#
+####
 
-FROM openjdk:11-jre-slim
-COPY --from=build /home/app/target/demo-0.0.1-SNAPSHOT.jar /usr/local/lib/demo.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","/usr/local/lib/demo.jar"]
+    FROM openjdk:11-jre-slim
+    COPY --from=build /home/app/target/demo-0.0.1-SNAPSHOT.jar /usr/local/lib/demo.jar
+    EXPOSE 8080
+    ENTRYPOINT ["java","-jar","/usr/local/lib/demo.jar"]
 
 O primeiro estágio é usado para construir o código. O segundo estágio contém apenas o jar construído e um JRE para executá-lo (observe como o jar é copiado entre os estágios).
 
@@ -495,8 +495,59 @@ utilize o spring boot dashboard
 crie o arqruivo import.sql
 product-api/src/main/resources/import.sql
 
-INSERT INTO CATEGORY (ID, DESCRIPTION) VALUES (1000, 'Comic Books');
-INSERT INTO PRODUCT (ID, NAME, FK_SUPPLIER, FK_CATEGORY, QUANTITY_AVAILABLE, CREATED_AT) VALUES (1001, 'Crise nas Infinitas Terras', 1000, 1000, 10, CURRENT_TIMESTAMP);
+-- Active: 1684671715804@@127.0.0.1@5433@db-product@public
+
+INSERT INTO CATEGORY (ID, DESCRIPTION) VALUES (1, 'Comic Books');
+
+INSERT INTO CATEGORY (ID, DESCRIPTION) VALUES (2, 'Movies');
+
+INSERT INTO CATEGORY (ID, DESCRIPTION) VALUES (3, 'Books');
+
+INSERT INTO SUPPLIER (ID, NAME) VALUES (1, 'Panini Comics');
+
+INSERT INTO SUPPLIER (ID, NAME) VALUES (2, 'Amazon');
+
+INSERT INTO
+PRODUCT (
+ID,
+NAME,
+FK_SUPPLIER,
+FK_CATEGORY,
+QUANTITY_AVAILABLE
+)
+VALUES (
+1,
+'Crise nas Infinitas Terras',
+1,
+1,
+10
+);
+
+INSERT INTO
+PRODUCT (
+ID,
+NAME,
+FK_SUPPLIER,
+FK_CATEGORY,
+QUANTITY_AVAILABLE
+)
+VALUES (2, 'Interestelar', 1, 1, 5);
+
+INSERT INTO
+PRODUCT (
+ID,
+NAME,
+FK_SUPPLIER,
+FK_CATEGORY,
+QUANTITY_AVAILABLE
+)
+VALUES (
+3,
+'Harry Potter E A Pedra Filosofal',
+1,
+2,
+3
+);
 
 o java vai compilar esse arquivo em resource
 
@@ -804,9 +855,3 @@ dos bancos de dados PostgreSQL, MongoDB e do message broker RabbitMQ:
 `docker-compose up --build`
 
 Para ignorar os logs, adicione a flag `-d`.
-
-## Autor
-
-### Victor Hugo Negrisoli
-
-### Desenvolvedor de Software Back-End
