@@ -94,15 +94,117 @@ Baixe o código do Spring-Boot configurado Acesse https://start.spring.io/
 Maven
 Spring Boot estável
 group> br.com.aes
-Artifact (nome do projeto): simple-db Name: dslist
+Artifact (nome do projeto): simple-db Name: product-api
 Packaging (linguagem java): jar versão: 17 (LTS)
-Adicionar dependências: 4
-Spring Web WEB Build web
+Adicionar dependências:
+Spring Boot DevTools
+Spring Web WEB Build web ( rest rota get...)
+Lombok (abstrait getter e setter)
 Spring Data JPA SQL (banco de dados)
-H2 Database SQL (banco de dados em memória para testes)
 PostgreSQL Driver SQL (banco de dados na nuven) A JDBC and R2DBC driver that allows
-lombok
+Spring for RabbitMQ
+OpenFeign
 Generate Project
+
+## arquivo de incialização:
+
+abra a pasta do projeto no vscode para baixar as dependncias
+
+vá até o arquivo: src/main/java/br/com/aes/simpledb/SimpleDbApplication.java
+
+Com o projeto criado, vá no vscode e abra a pasta que acabamos de criar. O vscode irá tentar inicializar as extensões, e atualizar as dependências Maven suportar o projeto, então, aguarde até que o processo termine antes de continuar:
+
+atualização no menu inferior do vscode
+
+as dependencias fica no arquivo pow.xml
+opicional: pode-se comnetar as dependenciasa seguir, pois não uasremos agora e toda a hora que o projeto iniciar vai configurra o acesso ao banco de dados.
+Spring Data JPA SQL (banco de dados)
+PostgreSQL Driver SQL
+
+cometar as dependencias que não utilizaremos agora:jpa e postgresql
+Caso não comnete dará um erro posi não configuramos ainda o acesso ao banco de dados
+
+<!-- <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>-->
+<!-- <dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+		</dependency> -->
+
+## Criação de uma controller padrão
+
+criar a pasta: controllers
+cria o arquivo: StatusController.java
+src/main/java/br/com/aes/productapi/controllers/StatusController.java
+
+### cria a classe: StatusController.java
+
+package br.com.aes.productapi.controllers;
+
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@RestController
+public class StatusController {
+
+@GetMapping(value = "/")
+public String getMethodName() {
+return "Olá Mundo";
+}
+
+}
+
+# rodar o projeto para teste
+
+run
+http://localhost:8080
+
+### modificar a classe: StatusController.java
+
+src/main/java/br/com/aes/productapi/controllers/StatusController.java
+StatusController.java
+
+@RestController
+@RequestMapping("/api/status")
+public class StatusController {
+
+@GetMapping("status")
+public ResponseEntity<HashMap<String, Object>> getApiStatus(){
+var response = new HashMap<String, Object>();
+
+    response.put("service", "Produtct-API");
+    response.put("status", "up");
+    response.put("httpStatus", HttpStatus.OK.value());
+
+    return ResponseEntity.ok(response)
+
+}
+}
+
+# rodar o projeto
+
+run
+
+acessar
+http://localhost:8080/api/status
+
+### configurações para mudar o local host:
+
+Arquivo resources: configuraçoes
+trocar application.properties para application.yml
+
+inserir:
+server:
+port: ${PORT:8081}
+
+spring:
+application:
+name: Product-api
+
+## Criação de uma controller padrão
 
 # Projeto completo
 
