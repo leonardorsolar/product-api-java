@@ -1,0 +1,17 @@
+version: "3"
+services:
+  
+  product-db:
+    image: postgres
+    container_name: db-product
+    restart: always
+    environment:
+      - POSTGRES_DB=db-product
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    ports:
+      - 5433:5432
+  
+
+
+  
