@@ -62,7 +62,7 @@ remover todos os dokcers parados: docker container prune
 docker rm <ID>
 docker logs --follow ID
 
-## docker-composer:
+## docker-composer: docker-compose.yml
 
 Dentro do nosso projeto temos como criar os container e renicia-lo via docker composer
 
@@ -80,13 +80,18 @@ ports: - 5433:5432
 
 vai criar a network ( nosso projeto não precisa de uma rede específica)
 
-run na raiz do projeto:docker-compose up --build
+run na raiz do projeto: docker-compose up --build
 
 # Desenvolvimento da aplicação
 
-# Criação do porjeto Produtc API com java, spring boot e PostgresSQl
+# Criação do projeto Produtc API com java, spring boot e PostgresSQl
 
 Inicializar a api de produtos: java srping boot
+
+Criando projeto java maven:
+criar nosso projeto baseado no Spring Boot a partir do template do spring Initializr.
+
+Maven é uma ferramenta de automação de construção baseada em Modelo de objeto do projeto POM para abreviar . O Maven é usado para construção de projetos, gerenciamento de dependências e documentação. O pom.xmlarquivo de um projeto baseado em maven contém todas as dependências, repositórios etc. necessários para construir e executar esse projeto.
 
 Vamos iniciar o nosso projeto criando o arquivo Spring-Boot.Configure os metadados básicos do seu projeto, quais dependências do Spring nós vamos utilizar (Web no caso) e pronto!
 
@@ -108,7 +113,7 @@ Generate Project
 
 ## arquivo de incialização:
 
-abra a pasta do projeto no vscode para baixar as dependncias
+abra a pasta do projeto no vscode para baixar as dependências
 
 vá até o arquivo: src/main/java/br/com/aes/simpledb/SimpleDbApplication.java
 
@@ -134,13 +139,15 @@ Caso não comnete dará um erro posi não configuramos ainda o acesso ao banco d
 			<scope>runtime</scope>
 		</dependency> -->
 
-## Criação de uma controller padrão
+## Criação de uma controller padrão: Criando um serviço REST
 
 criar a pasta: controllers
 cria o arquivo: StatusController.java
 src/main/java/br/com/aes/productapi/controllers/StatusController.java
 
 ### cria a classe: StatusController.java
+
+Vamos criar uma controller contendo apenas um método Http Get retornando uma simples String com o conteúdo: "Hello world". Então vamos criar uma classe, com o nome de HelloController e adicionar o seguinte conteúdo:
 
 package br.com.aes.productapi.controllers;
 
@@ -191,7 +198,7 @@ run
 acessar
 http://localhost:8080/api/status
 
-### configurações para mudar o local host:
+### opicional: configurações para mudar o local host:
 
 Arquivo resources: configuraçoes
 trocar application.properties para application.yml
@@ -204,7 +211,378 @@ spring:
 application:
 name: Product-api
 
-## Criação de uma controller padrão
+# opicional: rodar o maven no container - (Dockerfile)
+
+Dockerizing é o processo de compactação, implantação e execução de aplicativos usando contêineres do Docker.
+
+Criação do dockerfile do projeto Product-API
+Criando e enviando imagem Docker com Java e Maven
+Apache Maven, ou Maven, é uma ferramenta de automação de compilação, gerenciamento, construção e implantação de projetos.
+
+    Um * Dockerfile é um arquivo de configuração de texto/script que contém coleções de comandos que serão executados automaticamente, em sequência, no ambiente Docker para criar uma nova imagem do Docker.
+
+Create a Dockerfile
+
+#
+
+# Build stage
+
+#
+
+FROM maven:3.6.0-jdk-11-slim AS build
+COPY src /home/app/src
+COPY pom.xml /home/app
+RUN mvn -f /home/app/pom.xml clean package
+
+#
+
+# Package stage
+
+#
+
+FROM openjdk:11-jre-slim
+COPY --from=build /home/app/target/demo-0.0.1-SNAPSHOT.jar /usr/local/lib/demo.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","/usr/local/lib/demo.jar"]
+
+O primeiro estágio é usado para construir o código. O segundo estágio contém apenas o jar construído e um JRE para executá-lo (observe como o jar é copiado entre os estágios).
+
+Construa a imagem:
+docker build -t demo .
+
+docker logs --follow ID
+
+docker do Maven: https://hub.docker.com/_/maven
+
+sundindo com o docker-compose: arquivo docker-compose.yml
+posso subit o postgres e se configurado o product-api/Dockerfile
+posso subir tambpem o docker do mavem
+
+# BANCO DE DADOS
+
+# configurando o postgres na aplicação
+
+descomentar as dependencias :
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-java</artifactId>
+    <scope>runtime</scope>
+</dependency>
+
+## Realizar a configuração para conexão
+
+Configuraçẽos do banco de dados de teste: application-test.properties
+Configurando o MySQL em projetos Spring Boot
+
+Após efetuar o download das dependências, vamos configurar as propriedades do MySQL e do JPA no projeto.
+
+// Criar a conexão com banco de dados MySQL
+host: "localhost",
+user: "root",
+password: "root",
+database: "db-product",
+
+<!-- server host: localhost
+port 3306
+database: database
+nome de uusário: root
+senha: root -->
+
+# application.properties : banco mysql db-product
+
+Para isso edite o arquivo de configuração application.properties e adicione o seguinte conteúdo:
+
+codigo base:----
+
+spring.jpa.database=POSTGRESQL
+spring.datasource.platform=postgres
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.database.driverClassName=org.postgresql.Driver
+spring.datasource.url=jdbc:postgresql://localhost:5433/db-product
+spring.datasource.username=root
+spring.datasource.password=root
+server.port=8080
+
+----fim do codigo.
+
+# opicional: application.yml : banco postgres
+
+server:
+port: ${PORT:8081}
+
+spring:
+main:
+allow-bean-definition-overriding: true
+
+application:
+name: product-api
+
+datasource:
+driver-class-name: org.postgresql.Driver # url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:db-databases}
+url: jdbc:postgresql://localhost:5433/db-databases # username: ${DB_USER:root} # password: ${DB_PASSWORD:root}
+username: root
+password: root
+
+jpa:
+hibernate:
+ddl-auto: create-drop
+show_sql: true
+properties:
+hibernate:
+dialect: org.hibernate.dialect.PostgreSQL9Dialect
+
+### Configurando o modelo para gerar uma tabela no banco de dados
+
+Vamos criar uma entidade que será convertida em tabela no nosso mysql.
+As entidades para representar o relacionamento de tabelas de uma Livaria. Onde teremos a tabela Book
+
+# Mapeamento das tabelas em classes
+
+Aqui vamos aplicar a técnica de Mapeamento objeto-relacional (ORM), que é utilizada para reduzir a impedância da programação orientada aos objetos utilizando bancos de dados relacionais.
+
+## criando uma classe Entity: rota de categoria, produto e fornecedor
+
+product-api/src/main/java/br/com/aes/productapi/modules
+
+atributos: variáveis e os tipos
+construtor sem argumento public Entity() { }
+construtor com argumento public Entity() { }
+métodos getter e setter para encapsulamento
+métodos hascode e equals para comparar 2 objetos (comparar se 2 gamers são iguais ou não dentro de uma lista)
+
+# ORM - Mapeamento objeto relacional
+
+Para fazer o mapeamento relacional para que tenhas o registro na tabela é necessários algumas configurações:
+
+1- cria-se os atibutos da classe
+2-anotations da classe
+@Data: criará os geters e setters tostring hascode
+@NoArgsConstructor: contrutor vazio
+@AllArgsConstructor: contrutor
+@Entity: informa o persistence que isso é uma entidade
+@Table(name = "CATEGORY"): cria a tabla com o nome
+3- anotations dos atributos:
+@Id
+@GeneratedValue(strategy = GenerationType.SEQUENCE): método de gerar
+@Column(name = "DESCRIPTION", nullable = false): mudar o campo da tabela
+
+@Data
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "CATEGORY")
+public class Category {
+
+@Id
+@GeneratedValue(strategy = GenerationType.SEQUENCE)
+private Integer id;
+@Column(name = "DESCRIPTION", nullable = false)
+private String description;
+
+}
+
+Adicionais:
+
+id_product | name | id_supplier
+1|name1|1
+1|name1|2
+2|name1|3
+2|name2|1
+2|name2|2
+2|name2|3
+
+@ManyToOne: Varios suppliers para cada produto
+@JoinColumn(name = "FK_SUPPLIER", nullable = false): chave estartngeira
+
+@ManyToOne
+@JoinColumn(name = "FK_SUPPLIER", nullable = false)
+private Supplier supplier;
+
+É necessário: nome da tabela, os campos, os tipos, chave primaria
+
+        // anotations
+        //Entity: especifica a criação da tabela
+        @Entity
+        @Table(name = "tb_product")
+        public class Entity { ...
+
+
+    Em cima do nome da classe: anotation @Entity (anotation vai configurar o classe java para que ela seja equivalente a uma tabela do banco de dados)
+    Em cima do nome da classe tem como customizar o nome da tabela do banco: @Table(name = "tb_product")
+    Em cima do atributo tem como configurar a chave primária e autoincremental:
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Modificando um nome de uma coluna:
+    @Column(name = "game_year") private Integer year;
+    Modificandoo tipo de uma coluna: @Column(columnDefinition = "TEXT") private String shortDescription
+
+    todo atributo tem que ter o getter e setter: selecione o atributo e clique na lampada e peça para gersra o get e set
+
+# classe Category:
+
+@Data
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "CATEGORY")
+public class Category {
+
+@Id
+@GeneratedValue(strategy = GenerationType.SEQUENCE)
+private Integer id;
+@Column(name = "DESCRIPTION", nullable = false)
+private String description;
+
+}
+
+# classe supplier:
+
+@Data
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "SUPPLIER")
+public class Supplier {
+
+@Id
+@GeneratedValue(strategy = GenerationType.SEQUENCE)
+private Integer id;
+
+@Column(name = "NAME", nullable = false)
+private String name;
+
+}
+
+# classe Product:
+
+@Data
+@Entity
+// @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "PRODUCT")
+public class Product {
+
+@Id
+@GeneratedValue(strategy = GenerationType.SEQUENCE)
+private Integer id;
+
+@Column(name = "NAME", nullable = false)
+private String name;
+
+@ManyToOne
+@JoinColumn(name = "FK_SUPPLIER", nullable = false)
+private Supplier supplier;
+
+@ManyToOne
+@JoinColumn(name = "FK_CATEGORY", nullable = false)
+private Category category;
+
+}
+
+# Testando a criação da tabela
+
+run
+utilize o spring boot dashboard
+
+# Inserindo dados no banco de dados
+
+crie o arqruivo import.sql
+product-api/src/main/resources/import.sql
+
+INSERT INTO CATEGORY (ID, DESCRIPTION) VALUES (1000, 'Comic Books');
+INSERT INTO PRODUCT (ID, NAME, FK_SUPPLIER, FK_CATEGORY, QUANTITY_AVAILABLE, CREATED_AT) VALUES (1001, 'Crise nas Infinitas Terras', 1000, 1000, 10, CURRENT_TIMESTAMP);
+
+o java vai compilar esse arquivo em resource
+
+# Criando a estrutura de cada módulo: DTO, Repository, Service e Controller
+
+# módulo: Product
+
+(fazer)
+
+# Criar nosso repositório
+
+Camada de persistencias: parte do projeto onde podemos realizar ações no banco de dados (cadastros/seleções/atualizações/exclusões)
+
+vamos criar algumas interfaces que serão responsáveis por todas as operações das nossas tabelas com o banco de dados.
+
+repositories:
+src/main/java/br/com/aes/simpledb/repositories/BookRepository.java
+
+public interface BookRepository extends JpaRepository<Book, Long> {
+
+}
+
+Ao herdarmos JpaRepository o Spring Data será responsável por criar uma implementação das nossas interfaces em tempo de execução, e com isso ganhamos produtividade, pois essas interfaces vão prover inúmeros métodos para manipular os objetos diretamente no banco de dados.
+
+# Interagindo com o banco de dados
+
+Agora vamos criar uma classe que vai popular nosso banco de dados e por fim realizar algumas consultas.
+
+# Controller
+
+anotation @Autowired: é um atalho onde não há necessiadde de isntanciar objetos (injeção de dependências)
+
+src/main/java/br/com/aes/simpledb/controllers/BookController.java
+
+@RestController
+@RequestMapping(value = "/book")
+public class BookController {
+
+@Autowired
+private BookRepository bookRepository;
+
+// @GetMapping("getAll")
+// public List<Book> getData() {
+// return bookRepository.findAll();
+// }
+
+@GetMapping
+public List<Book> findAll() {
+List<Book> result = bookRepository.findAll();
+return result;
+}
+
+}
+
+# Service
+
+src/main/java/br/com/aes/simpledb/services/BookService.java
+
+public class BookService {
+
+}
+
+Componente responsável por implementar lógica de negócio(regras)
+
+Registrar os componentes: @Component ou apelido: @Service
+
+public retorno função(){
+
+}
+
+public List findAll() {
+
+}
+
+é necessário injetar a dependência para acessar os métodos do repository (puxando uma isntância)
+
+@Autowired private GameRepository gameRepository;
+
+trazer a lista do banco dedados
+
+public List findAll() { List result = gameRepository.findAll(); return result; }
+
+# Testar a classe: run
+
+fonte
+https://www.gasparbarancelli.com/post/banco-de-dados-mysql-com-spring-boot
 
 # Projeto completo
 
